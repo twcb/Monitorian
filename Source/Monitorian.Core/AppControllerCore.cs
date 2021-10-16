@@ -30,7 +30,7 @@ namespace Monitorian.Core
 		protected internal SettingsCore Settings { get; }
 
 		public ObservableCollection<MonitorViewModel> Monitors { get; }
-		protected readonly object _monitorsLock = new object();
+		protected readonly object _monitorsLock = new();
 
 		public NotifyIconContainer NotifyIconContainer { get; }
 		public WindowPainter WindowPainter { get; }
@@ -305,6 +305,7 @@ namespace Monitorian.Core
 									{
 										x.IsTarget = true;
 									}
+									x.UpdateSpeakerVolume();
 									return x.IsControllable;
 								});
 							}

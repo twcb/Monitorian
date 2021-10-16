@@ -17,6 +17,7 @@ namespace Monitorian.Core.Models.Monitor
 		bool IsReachable { get; }
 		bool IsBrightnessSupported { get; }
 		bool IsContrastSupported { get; }
+		bool IsSpeakerVolumeSupported { get; }
 
 		int Brightness { get; }
 		int BrightnessSystemAdjusted { get; }
@@ -28,6 +29,11 @@ namespace Monitorian.Core.Models.Monitor
 
 		AccessResult UpdateContrast();
 		AccessResult SetContrast(int contrast);
+
+		int SpeakerVolume { get; }
+
+		AccessResult UpdateSpeakerVolume();
+		AccessResult SetSpeakerVolume(int volume);
 	}
 
 	public enum AccessStatus

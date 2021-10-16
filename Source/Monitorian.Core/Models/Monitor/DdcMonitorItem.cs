@@ -18,6 +18,7 @@ namespace Monitorian.Core.Models.Monitor
 
 		public override bool IsBrightnessSupported => _capability.IsBrightnessSupported;
 		public override bool IsContrastSupported => _capability.IsContrastSupported;
+		public override bool IsSpeakerVolumeSupported => _capability.IsSpeakerVolumeSupported;
 
 		public DdcMonitorItem(
 			string deviceInstanceId,
@@ -106,6 +107,42 @@ namespace Monitorian.Core.Models.Monitor
 			if (result.Status == AccessStatus.Succeeded)
 			{
 				this.Contrast = contrast;
+			}
+			return result;
+		}
+
+		private uint _minimumSpeakerVolume = 0; // Raw minimum contrast (0)
+		private uint _maximumSpeakerVolume = 100; // Raw maximum contrast (not always 100)
+
+		public override AccessResult UpdateSpeakerVolume()
+		{
+			var (result, minimum, current, maximum) = MonitorConfiguration.GetSpeakerVolume(_handle);
+
+			if ((result.Status == AccessStatus.Succeeded) && (minimum < maximum) && (minimum <= current) && (current <= maximum))
+			{
+				this.SpeakerVolume = (int)Math.Round((double)(current - minimum) / (maximum - minimum) * 100D, MidpointRounding.AwayFromZero);
+				this._minimumSpeakerVolume = minimum;
+				this._maximumSpeakerVolume = maximum;
+			}
+			else
+			{
+				this.SpeakerVolume = -1; // Default
+			}
+			return result;
+		}
+
+		public override AccessResult SetSpeakerVolume(int contrast)
+		{
+			if (contrast is < 0 or > 100)
+				throw new ArgumentOutOfRangeException(nameof(contrast), contrast, "The contrast must be within 0 to 100.");
+
+			var buffer = (uint)Math.Round(contrast / 100D * (_maximumSpeakerVolume - _minimumSpeakerVolume) + _minimumSpeakerVolume, MidpointRounding.AwayFromZero);
+
+			var result = MonitorConfiguration.SetSpeakerVolume(_handle, buffer);
+
+			if (result.Status == AccessStatus.Succeeded)
+			{
+				this.SpeakerVolume = contrast;
 			}
 			return result;
 		}

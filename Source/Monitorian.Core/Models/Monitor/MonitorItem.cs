@@ -20,6 +20,7 @@ namespace Monitorian.Core.Models.Monitor
 
 		public virtual bool IsBrightnessSupported => IsReachable;
 		public virtual bool IsContrastSupported => false;
+		public virtual bool IsSpeakerVolumeSupported => false;
 
 		public MonitorItem(
 			string deviceInstanceId,
@@ -53,6 +54,11 @@ namespace Monitorian.Core.Models.Monitor
 		public virtual AccessResult UpdateContrast() => AccessResult.NotSupported;
 		public virtual AccessResult SetContrast(int contrast) => AccessResult.NotSupported;
 
+		public int SpeakerVolume { get; protected set; } = -1;
+
+		public virtual AccessResult UpdateSpeakerVolume() => AccessResult.NotSupported;
+		public virtual AccessResult SetSpeakerVolume(int volume) => AccessResult.NotSupported;
+
 		public override string ToString()
 		{
 			return SimpleSerialization.Serialize(
@@ -67,7 +73,8 @@ namespace Monitorian.Core.Models.Monitor
 				(nameof(IsContrastSupported), IsContrastSupported),
 				(nameof(Brightness), Brightness),
 				(nameof(BrightnessSystemAdjusted), BrightnessSystemAdjusted),
-				(nameof(Contrast), Contrast));
+				(nameof(Contrast), Contrast),
+				(nameof(SpeakerVolume), SpeakerVolume));
 		}
 
 		#region IDisposable
