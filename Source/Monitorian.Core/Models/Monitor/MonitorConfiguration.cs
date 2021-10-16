@@ -267,6 +267,7 @@ namespace Monitorian.Core.Models.Monitor
 						isHighLevelBrightnessSupported: isHighLevelSupported,
 						isLowLevelBrightnessSupported: vcpCodes.Contains((byte)VcpCode.Luminance),
 						isContrastSupported: vcpCodes.Contains((byte)VcpCode.Contrast),
+						isSpeakerVolumeSupported:vcpCodes.Contains((byte)VcpCode.SpeakerVolume),
 						capabilitiesString: (verbose ? capabilitiesString : null),
 						capabilitiesReport: (verbose ? MakeCapabilitiesReport(vcpCodes) : null),
 						capabilitiesData: (verbose && !vcpCodes.Any() ? GetCapabilitiesData(physicalMonitorHandle, capabilitiesStringLength) : null));
@@ -275,7 +276,8 @@ namespace Monitorian.Core.Models.Monitor
 			return new MonitorCapability(
 				isHighLevelBrightnessSupported: isHighLevelSupported,
 				isLowLevelBrightnessSupported: false,
-				isContrastSupported: false);
+				isContrastSupported: false,
+				isSpeakerVolumeSupported: false);
 
 			static string MakeCapabilitiesReport(byte[] vcpCodes)
 			{
@@ -423,6 +425,21 @@ namespace Monitorian.Core.Models.Monitor
 			return GetVcpValue(physicalMonitorHandle, VcpCode.Contrast);
 		}
 
+		/// <summary>
+		/// Gets raw contrast not represented in percentage.
+		/// </summary>
+		/// <param name="physicalMonitorHandle">Physical monitor handle</param>
+		/// <returns>
+		/// <para>result: Result</para>
+		/// <para>minimum: Raw minimum volume (0)</para>
+		/// <para>current: Raw current volume (not always 0 to 100)</para>
+		/// <para>maximum: Raw maximum volume (not always 100)</para>
+		/// </returns>
+		public static (AccessResult result, uint minimum, uint current, uint maximum) GetSpeakerVolume(SafePhysicalMonitorHandle physicalMonitorHandle)
+		{
+			return GetVcpValue(physicalMonitorHandle, VcpCode.SpeakerVolume);
+		}
+
 		private static (AccessResult result, uint minimum, uint current, uint maximum) GetVcpValue(SafePhysicalMonitorHandle physicalMonitorHandle, VcpCode vcpCode)
 		{
 			if (!EnsurePhysicalMonitorHandle(physicalMonitorHandle))
@@ -489,6 +506,17 @@ namespace Monitorian.Core.Models.Monitor
 		public static AccessResult SetContrast(SafePhysicalMonitorHandle physicalMonitorHandle, uint contrast)
 		{
 			return SetVcpValue(physicalMonitorHandle, VcpCode.Contrast, contrast);
+		}
+
+		/// <summary>
+		/// Sets raw speaker volume not represented in percentage.
+		/// </summary>
+		/// <param name="physicalMonitorHandle">Physical monitor handle</param>
+		/// <param name="volume">Raw volume (not always 0 to 100)</param>
+		/// <returns>Result</returns>
+		public static AccessResult SetSpeakerVolume(SafePhysicalMonitorHandle physicalMonitorHandle, uint volume)
+		{
+			return SetVcpValue(physicalMonitorHandle, VcpCode.SpeakerVolume, volume);
 		}
 
 		private static AccessResult SetVcpValue(SafePhysicalMonitorHandle physicalMonitorHandle, VcpCode vcpCode, uint value)
@@ -590,10 +618,14 @@ namespace Monitorian.Core.Models.Monitor
 		[DataMember(Order = 6)]
 		public string CapabilitiesData { get; }
 
+		[DataMember(Order = 6)]
+		public bool IsSpeakerVolumeSupported { get; }
+
 		public MonitorCapability(
 			bool isHighLevelBrightnessSupported,
 			bool isLowLevelBrightnessSupported,
 			bool isContrastSupported,
+			bool isSpeakerVolumeSupported,
 			string capabilitiesString = null,
 			string capabilitiesReport = null,
 			byte[] capabilitiesData = null)
@@ -601,6 +633,7 @@ namespace Monitorian.Core.Models.Monitor
 			this.IsHighLevelBrightnessSupported = isHighLevelBrightnessSupported;
 			this.IsLowLevelBrightnessSupported = isLowLevelBrightnessSupported;
 			this.IsContrastSupported = isContrastSupported;
+			this.IsSpeakerVolumeSupported = isSpeakerVolumeSupported;
 			this.CapabilitiesString = capabilitiesString;
 			this.CapabilitiesReport = capabilitiesReport;
 			this.CapabilitiesData = (capabilitiesData is not null) ? Convert.ToBase64String(capabilitiesData) : null;

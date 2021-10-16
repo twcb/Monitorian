@@ -325,6 +325,7 @@ namespace Monitorian.Core
 									{
 										x.IsTarget = true;
 									}
+									x.UpdateSpeakerVolume();
 									return x.IsControllable;
 								});
 							}
